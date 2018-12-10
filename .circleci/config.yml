@@ -1,0 +1,91 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: takemikami/google-cloud-sdk-gae-java8:latest
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+      GCLOUD_PROJECT: schoolynk-dev
+
+    steps:
+      - run:
+          name: install ci-utils
+          command: |
+            mkdir -p $HOME/.ci-utils
+            curl -L https://github.com/takemikami/ci-utils/archive/master.tar.gz | tar zx -C $HOME/.ci-utils --strip-components 1
+            echo 'export PATH=$PATH:$HOME/.ci-utils/bin' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: install jq
+          command: |
+            apk update
+            apk add jq
+
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: ./gradlew dependencies
+
+      # check code
+      - run:
+          name: check code
+          command: ./gradlew check
+
+      # run tests
+      - run:
+          name: test
+          command: ./gradlew test
+
+      # build stageapp
+      - run:
+          name: test
+          command: ./gradlew appengineStage
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # store test result
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+
+      # deploy
+      - deploy:
+          name: Deploy
+          command: |
+            echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
+            source $BASH_ENV
+            echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            gcloud config set project $GCLOUD_PROJECT
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              PROMOTE=promote ./gradlew appengineDeploy
+            elif [ "${CIRCLE_PR_NUMBER}" != "" ]; then
+              ./gradlew appengineDeploy
+              TARGET_URL=https://${CIRCLE_PR_NUMBER}-dot-api-dot-schoolynk-dev.appspot.com/swagger-ui.html
+              ciutils_gh_deployment_post -u $TARGET_URL
+            fi
