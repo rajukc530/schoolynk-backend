@@ -1,9 +1,6 @@
 schoolynk-api
 ---
 
-[![CircleCI](https://circleci.com/gh/SchooLynk/schoolynk-api.svg?style=shield&circle-token=303fcbb33ba5b57a9ed88b5caf36774efe22d396)](https://circleci.com/gh/SchooLynk/schoolynk-api)
-[![develop](https://img.shields.io/badge/host-dev-yellowgreen.svg)](https://api-dot-schoolynk-dev.appspot.com/swagger-ui.html)
-
 schoolynk-console component is backend Rest API server application.
 SchooLynk is a web-based support tool to go on to university for students.
 
@@ -18,7 +15,6 @@ Setup following prerequisite software.
 clone repository.
 
 ```
-git clone git@github.com:SchooLynk/schoolynk-api.git
 ```
 
 import to IntelliJ IDEA.
@@ -57,18 +53,12 @@ execute schoolynk-api on your local pc.
 gradle appengineRun
 ```
 
-more information
-- https://github.com/SchooLynk/schoolynk-specifications/blob/master/6.howtojoin/localenv/idea.md
-- https://github.com/SchooLynk/schoolynk-specifications/blob/master/6.howtojoin/localenv/gcloudsdk.md
-- https://cloud.google.com/datastore/docs/tools/datastore-emulator
-
 ## Contributing
 
 ### How to report issues.
 
 visit github issue page.
 
-https://github.com/SchooLynk/schoolynk-api/issues
 
 check exisiting issues.
 
@@ -80,4 +70,3 @@ if you don't find, create new issue.
 
 write your code and check, with github flow.
 
-https://github.com/SchooLynk/schoolynk-specifications/blob/master/6.howtojoin/process/ghflow.md
