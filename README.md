@@ -1,4 +1,4 @@
-schoolynk-api
+schoolynk-backend
 ---
 
 schoolynk-console component is backend Rest API server application.
@@ -47,7 +47,7 @@ set environment variables(run this command at same terminal as following command
 $(gcloud beta emulators datastore env-unset)
 ```
 
-execute schoolynk-api on your local pc.
+execute schoolynk-backend on your local pc.
 
 ```
 gradle appengineRun
